@@ -5,6 +5,7 @@ __pycache__/
 /notebook/dataset.csv
 /artifacts
 /logs
+.kaggle
 
 # C extensions
 *.so
