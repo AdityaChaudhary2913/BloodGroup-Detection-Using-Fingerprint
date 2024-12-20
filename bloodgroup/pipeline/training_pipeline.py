@@ -4,29 +4,30 @@ from zipfile import Path
 from bloodgroup.logger import logging
 from bloodgroup.exception import CustomException
 from bloodgroup.components.data_ingestion import DataIngestion
-# from bloodgroup.components.data_transforamation import DataTransformation
+from bloodgroup.components.data_transformation import DataTransformation
 # from bloodgroup.components.model_trainer import ModelTrainer
 # from bloodgroup.components.model_evaluation import ModelEvaluation
 # from bloodgroup.components.model_pusher import ModelPusher
 
 from bloodgroup.entity.config_entity import (DataIngestionConfig,
-                                    #    DataTransformationConfig,
+                                        DataTransformationConfig,
                                     #    ModelTrainerConfig,
                                     #    ModelEvaluationConfig,
                                     #    ModelPusherConfig
                                        )
 
-# from bloodgroup.entity.artifact_entity import (DataIngestionArtifacts,
-#                                          DataTransformationArtifacts,
+from bloodgroup.entity.artifact_entity import (DataIngestionArtifacts,
+                                            DataTransformationArtifacts,
 #                                          ModelTrainerArtifacts,
 #                                          ModelEvaluationArtifacts,
-#                                          ModelPusherArtifacts)
+#                                          ModelPusherArtifacts
+)
 
 
 class TrainPipeline:
     def __init__(self):
         self.data_ingestion_config = DataIngestionConfig()
-        # self.data_transformation_config = DataTransformationConfig()
+        self.data_transformation_config = DataTransformationConfig()
         # self.model_trainer_config = ModelTrainerConfig()
         # self.model_evaluation_config =ModelEvaluationConfig()
         # self.model_pusher_config = ModelPusherConfig()
@@ -43,15 +44,15 @@ class TrainPipeline:
         except Exception as e:
             raise CustomException(e, sys) from e    
 
-    # def start_data_transformation(self, data_ingestion_artifacts = DataIngestionArtifacts) -> DataTransformationArtifacts:
-    #     logging.info("Entered the start_data_transformation method of TrainPipeline class")
-    #     try:
-    #         data_transformation = DataTransformation(data_ingestion_artifacts = data_ingestion_artifacts,data_transformation_config=self.data_transformation_config)
-    #         data_transformation_artifacts = data_transformation.initiate_data_transformation()
-    #         logging.info("Exited the start_data_transformation method of TrainPipeline class")
-    #         return data_transformation_artifacts
-    #     except Exception as e:
-    #         raise CustomException(e, sys) from e
+    def start_data_transformation(self, data_ingestion_artifacts = DataIngestionArtifacts) -> DataTransformationArtifacts:
+        logging.info("Entered the start_data_transformation method of TrainPipeline class")
+        try:
+            data_transformation = DataTransformation(data_ingestion_artifacts = data_ingestion_artifacts,data_transformation_config=self.data_transformation_config)
+            data_transformation_artifacts = data_transformation.initiate_data_transformation()
+            logging.info("Exited the start_data_transformation method of TrainPipeline class")
+            return data_transformation_artifacts
+        except Exception as e:
+            raise CustomException(e, sys) from e
     
     # def start_model_trainer(self, data_transformation_artifacts: DataTransformationArtifacts) -> ModelTrainerArtifacts:
     #     logging.info("Entered the start_model_trainer method of TrainPipeline class")
@@ -96,12 +97,12 @@ class TrainPipeline:
             ingestion_duration = (end_time - start_time) / 60
             print(f"Ended Data Ingestion - Duration: {ingestion_duration:.2f} minutes\n\n")
             
-            # print("Started Data Transformation - Approx Duration: 5 minute\n")
-            # start_time = time.time()
-            # data_transformation_artifacts = self.start_data_transformation(data_ingestion_artifacts=data_ingestion_artifacts)
-            # end_time = time.time()
-            # transformation_duration = (end_time - start_time) / 60
-            # print(f"Ended Data Transformation - Duration: {transformation_duration:.2f} minutes\n\n")
+            print("Started Data Transformation - Approx Duration: 5 minute\n")
+            start_time = time.time()
+            data_transformation_artifacts = self.start_data_transformation(data_ingestion_artifacts=data_ingestion_artifacts)
+            end_time = time.time()
+            transformation_duration = (end_time - start_time) / 60
+            print(f"Ended Data Transformation - Duration: {transformation_duration:.2f} minutes\n\n")
             
             # print("Started Model Training - Approx Duration: 3 hour\n")
             # start_time = time.time()

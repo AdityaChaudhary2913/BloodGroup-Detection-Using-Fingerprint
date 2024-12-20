@@ -1,5 +1,4 @@
 import os
-import zipfile
 from bloodgroup.logger import logging
 from kaggle.api.kaggle_api_extended import KaggleApi
 from bloodgroup.entity.config_entity import DataIngestionConfig
