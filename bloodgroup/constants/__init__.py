@@ -24,6 +24,7 @@ NUM_WORKERS = 4
 
 # Model Trainer constants
 MODEL_TRAINER_ARTIFACTS_DIR = "ModelTrainerArtifacts"
+BEST_MODEL_NAME = "best_model.pth"
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 PATIENCE = 3
 EPOCHS = 100

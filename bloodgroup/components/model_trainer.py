@@ -61,6 +61,7 @@ class ModelTrainer:
                 best_accuracy = val_accuracy
                 patience_counter = 0  # Reset counter
                 os.makedirs(self.model_trainer_config.BEST_MODEL_PATH, exist_ok=True)
+                self.model_trainer_config.BEST_MODEL_PATH = os.path.join(self.model_trainer_config.BEST_MODEL_PATH, self.model_trainer_config.BEST_MODEL_NAME)
                 torch.save(model.state_dict(), self.model_trainer_config.BEST_MODEL_PATH)
                 logging.info(f"Saved best model with validation loss: {best_loss:.4f}, accuracy: {best_accuracy:.2f}%")
                 print(f"\nSaved best model with validation loss: {best_loss:.4f}, accuracy: {best_accuracy:.2f}%\n")
