@@ -56,7 +56,7 @@ class DataTransformation:
             transforms.RandomResizedCrop(size=IMAGE_SIZE, scale=(0.8, 1.0)),  # Random crop
             transforms.ColorJitter(brightness=0.2, contrast=0.2),  # Adjust brightness and contrast
             transforms.ToTensor(),  # Convert to PyTorch tensor
-            transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])  # Normalize to [-1, 1]
+            transforms.Normalize(mean=[0.5], std=[0.5])  # Normalize to [-1, 1]
         ])
 
     def get_normalization_transforms(self):
