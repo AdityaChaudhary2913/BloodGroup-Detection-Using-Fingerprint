@@ -51,6 +51,11 @@ class ModelTrainer:
         best_accuracy = 0.0
         best_loss = float('inf')
         patience_counter = 0
+        
+        best_model_dir = self.model_trainer_config.BEST_MODEL_PATH
+        os.makedirs(best_model_dir, exist_ok=True)
+        best_model_path = os.path.join(best_model_dir, self.model_trainer_config.BEST_MODEL_NAME)
+        
         for epoch in range(self.model_trainer_config.EPOCHS):
             logging.info(f"Epoch {epoch + 1}/{self.model_trainer_config.EPOCHS}")
             print(f"\nEpoch {epoch + 1}/{self.model_trainer_config.EPOCHS}\n")
@@ -59,10 +64,8 @@ class ModelTrainer:
             if val_loss < best_loss:
                 best_loss = val_loss
                 best_accuracy = val_accuracy
-                patience_counter = 0  # Reset counter
-                os.makedirs(self.model_trainer_config.BEST_MODEL_PATH, exist_ok=True)
-                self.model_trainer_config.BEST_MODEL_PATH = os.path.join(self.model_trainer_config.BEST_MODEL_PATH, self.model_trainer_config.BEST_MODEL_NAME)
-                torch.save(model.state_dict(), self.model_trainer_config.BEST_MODEL_PATH)
+                patience_counter = 0
+                torch.save(model.state_dict(), best_model_path)
                 logging.info(f"Saved best model with validation loss: {best_loss:.4f}, accuracy: {best_accuracy:.2f}%")
                 print(f"\nSaved best model with validation loss: {best_loss:.4f}, accuracy: {best_accuracy:.2f}%\n")
             else:
@@ -91,11 +94,20 @@ class ModelTrainer:
 
             # Train and validate
             best_accuracy = self.train_and_validate(model, train_loader, val_loader, criterion, optimizer)
+            
+            # Save final model after training
+            final_model_dir = self.model_trainer_config.FINAL_MODEL_PATH
+            os.makedirs(final_model_dir, exist_ok=True)
+            final_model_path = os.path.join(final_model_dir, "final_model.pth")
+            torch.save(model.state_dict(), final_model_path)
+            logging.info(f"Final model saved at: {final_model_path}")
+            print(f"\nFinal model saved at: {final_model_path}\n")
 
             # Save training artifacts
             model_trainer_artifacts = ModelTrainerArtifacts(
                 best_model_path=self.model_trainer_config.BEST_MODEL_PATH,
-                validation_accuracy=best_accuracy
+                validation_accuracy=best_accuracy,
+                final_model_path=final_model_path
             )
             logging.info(f"Model training completed with best accuracy: {best_accuracy:.2f}%")
             print(f"\nModel training completed with best accuracy: {best_accuracy:.2f}%\n")

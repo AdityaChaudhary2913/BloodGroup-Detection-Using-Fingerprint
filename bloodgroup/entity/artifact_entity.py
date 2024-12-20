@@ -14,3 +14,8 @@ class DataTransformationArtifacts:
 class ModelTrainerArtifacts:
     best_model_path: str
     validation_accuracy: float
+    final_model_path: str
+    
+@dataclass
+class ModelEvaluationArtifacts:
+    is_model_accepted: bool
