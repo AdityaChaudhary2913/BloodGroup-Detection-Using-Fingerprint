@@ -18,26 +18,10 @@ class DataTransformationConfig:
         self.TRAIN_LOADER_PATH: str = os.path.join(self.ARTIFACTS_DIR, TRAIN_LOADER)
         self.VAL_LOADER_PATH: str = os.path.join(self.ARTIFACTS_DIR, VAL_LOADER)
         self.TEST_LOADER_PATH: str = os.path.join(self.ARTIFACTS_DIR, TEST_LOADER)
-
+        
 @dataclass
-class PrepareBaseModelConfig:
+class ModelTrainerConfig:
     def __init__(self):
-        self.ARTIFACTS_DIR: str = os.path.join(os.getcwd(), ARTIFACTS_DIR, PREPARE_BASE_MODEL_ARTIFACTS_DIR)
-        self.BASE_MODEL_PATH: str = os.path.join(self.ARTIFACTS_DIR, BASE_MODEL_PATH)
-        self.UPDATED_BASE_MODEL_PATH: str = os.path.join(self.ARTIFACTS_DIR, UPDATED_BASE_MODEL_PATH)
-
-@dataclass
-class PrepareCallbacksConfig:
-    def __init__(self):
-        self.ARTIFACTS_DIR: str = os.path.join(os.getcwd(), ARTIFACTS_DIR, PREPARE_CALLBACKS_ARTIFACTS_DIR)
-        self.TENSORBOARD_LOG_DIR: str = os.path.join(self.ARTIFACTS_DIR, TENSORBOARD_LOG_DIR)
-        self.CHECKPOINT_DIR: str = os.path.join(self.ARTIFACTS_DIR, CHECKPOINT_DIR)
-
-@dataclass
-class TrainingConfig:
-    def __init__(self):
-        self.ARTIFACTS_DIR: str = os.path.join(os.getcwd(), ARTIFACTS_DIR, TRAINING_ARTIFACTS_DIR)
-        self.TRAINED_MODEL_PATH: str = os.path.join(self.ARTIFACTS_DIR, TRAINED_MODEL_PATH)
+        self.BEST_MODEL_PATH: str = os.path.join(os.getcwd(), ARTIFACTS_DIR, MODEL_TRAINER_ARTIFACTS_DIR)
         self.EPOCHS: int = EPOCHS
-        self.BATCH_SIZE: int = BATCH_SIZE
-        self.LEARNING_RATE: float = LEARNING_RATE
+        self.PATIENCE: int = PATIENCE

@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 from typing import Tuple
 from bloodgroup.entity.config_entity import DataTransformationConfig
 from bloodgroup.entity.artifact_entity import DataIngestionArtifacts, DataTransformationArtifacts
-from bloodgroup.constants import IMAGE_SIZE, BATCH_SIZE
+from bloodgroup.constants import IMAGE_SIZE, BATCH_SIZE, NUM_WORKERS
 
 class DataTransformation:
     def __init__(self, data_transformation_config: DataTransformationConfig, data_ingestion_artifacts: DataIngestionArtifacts):
@@ -42,7 +42,7 @@ class DataTransformation:
             label = self.labels[idx]
 
             # Load and preprocess the image
-            image = Image.open(img_path).convert("RGB")  # Ensure 3-channel image
+            image = Image.open(img_path).convert("L")
             if self.transform:
                 image = self.transform(image)
 
@@ -63,7 +63,7 @@ class DataTransformation:
         return transforms.Compose([
             transforms.Resize(IMAGE_SIZE),
             transforms.ToTensor(),
-            transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])  # Normalize to [-1, 1]
+            transforms.Normalize(mean=[0.5], std=[0.5])  # Normalize to [-1, 1]
         ])
 
     def prepare_dataloaders(self) -> Tuple[DataLoader, DataLoader, DataLoader]:
@@ -84,9 +84,9 @@ class DataTransformation:
         test_dataset.dataset.transform = val_transform
 
         # Create DataLoaders
-        train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
-        val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE, shuffle=False)
-        test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=False)
+        train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=NUM_WORKERS, pin_memory=True)
+        val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=NUM_WORKERS, pin_memory=True)
+        test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=NUM_WORKERS, pin_memory=True)
 
         return train_loader, val_loader, test_loader
 
