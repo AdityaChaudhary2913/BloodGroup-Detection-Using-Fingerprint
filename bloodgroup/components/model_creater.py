@@ -14,18 +14,20 @@ class BloodGroupClassifier(nn.Module):
         self.conv3 = nn.Conv2d(in_channels=64, out_channels=128, kernel_size=3, padding=1)
         self.conv4 = nn.Conv2d(in_channels=128, out_channels=256, kernel_size=3, padding=1)
         self.pool = nn.MaxPool2d(kernel_size=2, stride=2)
-        self.fc1 = nn.Linear(262144, 512)  # Adjust input size based on image resolution after pooling
+        self.fc1 = nn.Linear(32*32*256, 512) 
         self.fc2 = nn.Linear(512, 8)  # 8 output classes for blood groups
         self.dropout = nn.Dropout(p=0.5)
 
     def forward(self, x):
-        # Forward pass through convolutional layers + pooling
+        # Forward pass through convolutional layers
+        # Input x size: (batch_size, 1, 64, 64)
         x = F.relu(self.conv1(x))
         x = F.relu(self.conv2(x))
         x = F.relu(self.conv3(x))
         x = F.relu(self.conv4(x))
         
         x = self.pool(x)
+        # Output x size: (batch_size, 256, 32, 32)
 
         # Flatten the feature maps
         x = x.view(x.size(0), -1)
