@@ -107,7 +107,7 @@ class ModelTrainer:
 
             # Save training artifacts
             model_trainer_artifacts = ModelTrainerArtifacts(
-                best_model_path=self.model_trainer_config.BEST_MODEL_PATH,
+                best_model_path=os.path.join(self.model_trainer_config.BEST_MODEL_PATH, self.model_trainer_config.BEST_MODEL_NAME),
                 validation_accuracy=best_accuracy,
                 final_model_path=final_model_path,
                 test_loader_path=test_loader_path
