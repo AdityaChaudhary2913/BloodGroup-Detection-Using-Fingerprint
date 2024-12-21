@@ -15,6 +15,7 @@ class ModelTrainerArtifacts:
     best_model_path: str
     validation_accuracy: float
     final_model_path: str
+    test_loader_path: str
     
 @dataclass
 class ModelEvaluationArtifacts:

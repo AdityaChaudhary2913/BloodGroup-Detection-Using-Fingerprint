@@ -39,9 +39,11 @@ class NewModelEvaluation:
         except Exception as e:
             raise CustomException(e, sys) from e
 
-    def initiate_model_evaluation(self, val_loader) -> ModelEvaluationArtifacts:
+    def initiate_model_evaluation(self) -> ModelEvaluationArtifacts:
         try:
             logging.info("Initiating model evaluation")
+            
+            val_loader = torch.load(self.model_trainer_artifacts.test_loader_path)
 
             # Load the new trained model
             trained_model_path = self.model_trainer_artifacts.best_model_path

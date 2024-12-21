@@ -102,13 +102,17 @@ class ModelTrainer:
             torch.save(model.state_dict(), final_model_path)
             logging.info(f"Final model saved at: {final_model_path}")
             print(f"\nFinal model saved at: {final_model_path}\n")
+            
+            test_loader_path = self.data_transformation_artifacts.test_loader_path
 
             # Save training artifacts
             model_trainer_artifacts = ModelTrainerArtifacts(
                 best_model_path=self.model_trainer_config.BEST_MODEL_PATH,
                 validation_accuracy=best_accuracy,
-                final_model_path=final_model_path
+                final_model_path=final_model_path,
+                test_loader_path=test_loader_path
             )
+            
             logging.info(f"Model training completed with best accuracy: {best_accuracy:.2f}%")
             print(f"\nModel training completed with best accuracy: {best_accuracy:.2f}%\n")
             return model_trainer_artifacts
