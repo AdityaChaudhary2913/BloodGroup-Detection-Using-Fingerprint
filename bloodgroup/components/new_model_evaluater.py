@@ -3,6 +3,7 @@ import sys
 import torch
 from bloodgroup.logger import logging
 from bloodgroup.exception import CustomException
+from bloodgroup.components.model_creater import initialize_model
 from bloodgroup.entity.artifact_entity import ModelEvaluationArtifacts, ModelTrainerArtifacts
 from bloodgroup.constants import DEVICE, FINAL_MODEL_PATH
 
@@ -13,13 +14,14 @@ class NewModelEvaluation:
 
     def load_model(self, model_path: str):
         try:
-            model = torch.load(model_path)
+            model = initialize_model()
+            model.load_state_dict(torch.load(model_path, map_location=DEVICE))
             model.to(DEVICE)
-            logging.info(f"Model loaded successfully from {model_path}")
+            model.eval()
             return model
         except Exception as e:
             raise CustomException(e, sys) from e
-
+        
     def evaluate_model(self, model, val_loader):
         try:
             model.eval()
@@ -46,12 +48,12 @@ class NewModelEvaluation:
             val_loader = torch.load(self.model_trainer_artifacts.test_loader_path)
 
             # Load the new trained model
-            trained_model_path = self.model_trainer_artifacts.best_model_path
+            trained_model_path = self.model_trainer_artifacts.final_model_after_training_path
             trained_model = self.load_model(trained_model_path)
             new_model_accuracy = self.evaluate_model(trained_model, val_loader)
 
             # Path to the existing best model
-            final_model_dir = self.model_trainer_artifacts.final_model_path
+            final_model_dir = self.model_trainer_artifacts.final_model_after_evaluation_path
 
             # Check if a final model exists
             if os.path.exists(final_model_dir):
@@ -60,11 +62,13 @@ class NewModelEvaluation:
                 final_model_accuracy = self.evaluate_model(final_model, val_loader)
 
                 logging.info(f"New model accuracy: {new_model_accuracy:.2f}%")
-                logging.info(f"Final model accuracy: {final_model_accuracy:.2f}%")
+                logging.info(f"Evaluated model accuracy: {final_model_accuracy:.2f}%")
 
                 # Replace the final model if the new model performs better
                 if new_model_accuracy > final_model_accuracy:
+                    os.remove(final_model_dir)
                     torch.save(trained_model.state_dict(), final_model_dir)
+                    os.remove(trained_model_path)
                     logging.info("New model is better and has replaced the final model")
                     is_model_accepted = True
                 else:
@@ -73,7 +77,7 @@ class NewModelEvaluation:
             else:
                 # If no final model exists, save the new model as the final model
                 os.makedirs(FINAL_MODEL_PATH, exist_ok=True)
-                torch.save(trained_model.state_dict(), FINAL_MODEL_PATH)
+                torch.save(trained_model.state_dict(), self.model_trainer_artifacts.final_model_after_evaluation_path)
                 logging.info("No existing final model. New model saved as the final model")
                 is_model_accepted = True
 

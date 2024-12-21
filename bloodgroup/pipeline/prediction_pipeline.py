@@ -4,7 +4,7 @@ import torch
 from PIL import Image
 from torchvision import transforms
 from bloodgroup.logger import logging
-from bloodgroup.constants import FINAL_MODEL_NAME, CLASSES, IMAGE_SIZE, FINAL_MODEL_PATH, DEVICE
+from bloodgroup.constants import FINAL_MODEL_AFTER_EVALUATION_NAME, CLASSES, IMAGE_SIZE, FINAL_MODEL_PATH, DEVICE
 from bloodgroup.exception import CustomException
 from bloodgroup.components.model_creater import initialize_model
 from bloodgroup.components.data_transformation import DataTransformation
@@ -14,7 +14,7 @@ from bloodgroup.entity.artifact_entity import DataIngestionArtifacts
 
 class PredictionPipeline:
     def __init__(self):
-        self.model_path = os.path.join(FINAL_MODEL_PATH, FINAL_MODEL_NAME)
+        self.model_path = os.path.join(FINAL_MODEL_PATH, FINAL_MODEL_AFTER_EVALUATION_NAME)
         self.device = DEVICE
         self.classes = CLASSES 
         self.data_transformation = DataTransformation(

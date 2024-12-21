@@ -9,6 +9,7 @@ CLASSES = ["A+", "A-", "AB+", "AB-", "B+", "B-", "O+", "O-"]
 APP_PORT = 8080
 APP_HOST = "0.0.0.0"
 UPLOAD_FOLDER = "static/uploads"
+COMMAND = "export KAGGLE_CONFIG_DIR=/Users/adityachaudhary/Desktop/Important Projects/Data Science/BloodGroup-Detection-Using-Fingerprint/.kaggle"
 
 # Data ingestion constants
 DATA_INGESTION_ARTIFACTS_DIR = os.path.join("artifacts", "DataIngestionArtifacts")
@@ -29,8 +30,9 @@ NUM_WORKERS = 4
 # Model Trainer constants
 MODEL_TRAINER_ARTIFACTS_DIR = "ModelTrainerArtifacts"
 FINAL_MODEL_PATH = os.path.join("artifacts", "FinalModel")
-BEST_MODEL_NAME = "best_model.pth"
-FINAL_MODEL_NAME = "final_model.pth"
+EPOCH_MODEL = "epoch_model.pth"
+FINAL_MODEL_AFTER_EVALUATION_NAME = "final_model_after_evaluation.pth"
+FINAL_MODEL_AFTER_TRAINING_NAME = "final_model_after_training.pth"
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 PATIENCE = 5
 EPOCHS = 50

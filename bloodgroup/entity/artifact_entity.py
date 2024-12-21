@@ -12,9 +12,9 @@ class DataTransformationArtifacts:
     
 @dataclass
 class ModelTrainerArtifacts:
-    best_model_path: str
+    final_model_after_training_path: str
     validation_accuracy: float
-    final_model_path: str
+    final_model_after_evaluation_path: str
     test_loader_path: str
     
 @dataclass

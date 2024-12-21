@@ -1,18 +1,20 @@
-import os
+import os, subprocess
 from bloodgroup.logger import logging
 from kaggle.api.kaggle_api_extended import KaggleApi
+from bloodgroup.constants import COMMAND
 from bloodgroup.entity.config_entity import DataIngestionConfig
 from bloodgroup.entity.artifact_entity import DataIngestionArtifacts
 
 class DataIngestion:
     def __init__(self, data_ingestion_config: DataIngestionConfig):
         self.data_ingestion_config = data_ingestion_config
+        subprocess.run(COMMAND, shell=True)
+        os.environ["KAGGLE_CONFIG_DIR"] = os.path.expanduser(self.data_ingestion_config.KAGGLE_CREDENTIAL_DIR)
 
     def download_data(self):
         try:
             if not os.path.exists(self.data_ingestion_config.ARTIFACTS_DIR):
                 os.makedirs(self.data_ingestion_config.ARTIFACTS_DIR, exist_ok=True)
-                os.environ["KAGGLE_CONFIG_DIR"] = os.path.expanduser(self.data_ingestion_config.KAGGLE_CREDENTIAL_DIR)
                 api = KaggleApi()
                 api.authenticate()
                 print(f"Downloading data from {self.data_ingestion_config.SOURCE_URL}...")
