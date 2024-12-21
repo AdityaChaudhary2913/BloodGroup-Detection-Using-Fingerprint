@@ -98,7 +98,7 @@ class ModelTrainer:
             # Save final model after training
             final_model_dir = self.model_trainer_config.FINAL_MODEL_PATH
             os.makedirs(final_model_dir, exist_ok=True)
-            final_model_path = os.path.join(final_model_dir, "final_model.pth")
+            final_model_path = os.path.join(final_model_dir, self.model_trainer_config.FINAL_MODEL_NAME)
             torch.save(model.state_dict(), final_model_path)
             logging.info(f"Final model saved at: {final_model_path}")
             print(f"\nFinal model saved at: {final_model_path}\n")

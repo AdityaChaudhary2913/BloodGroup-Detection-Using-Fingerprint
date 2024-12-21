@@ -25,5 +25,6 @@ class ModelTrainerConfig:
         self.BEST_MODEL_PATH: str = os.path.join(os.getcwd(), ARTIFACTS_DIR, MODEL_TRAINER_ARTIFACTS_DIR)
         self.FINAL_MODEL_PATH: str = FINAL_MODEL_PATH
         self.BEST_MODEL_NAME: str = BEST_MODEL_NAME
+        self.FINAL_MODEL_NAME: str = FINAL_MODEL_NAME
         self.EPOCHS: int = EPOCHS
         self.PATIENCE: int = PATIENCE
