@@ -44,6 +44,15 @@
             color: #000000;
             margin-top: 20px;
         }
+        #video {
+            display: none;
+            margin: 20px auto;
+            border: 2px solid #007BFF;
+            border-radius: 10px;
+        }
+        #canvas {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -51,13 +60,35 @@
         <h1>Blood Group Detector</h1>
         <form id="uploadForm">
             <input type="file" id="fileInput" name="file" accept="image/*" required />
+            <img id="preview" src="#" alt="Image Preview" style="display: none;" />
             <button type="submit" class="button">Detect</button>
         </form>
-        <br />
+        <button id="captureFingerprint" class="button">Capture Fingerprint</button>
+        <p id="capture" style="display: none;">Click on Video to Capture</p>
+        <video id="video" width="300" height="300" autoplay></video>
+        <canvas id="canvas"></canvas>
         <p id="result"></p>
     </div>
 
     <script>
+        document.getElementById('fileInput').addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            const preview = document.getElementById('preview');
+
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (event) {
+                    preview.src = event.target.result;
+                    preview.style.display = 'block';
+                    preview.style.margin = '20px auto';
+                };
+                reader.readAsDataURL(file); // Convert file to data URL
+            } else {
+                preview.src = '#';
+                preview.style.display = 'none'; // Hide the preview if no file selected
+            }
+        });
+
         document.getElementById('uploadForm').addEventListener('submit', async function (e) {
             e.preventDefault();
             const formData = new FormData();
@@ -79,6 +110,55 @@
             } catch (err) {
                 document.getElementById('result').innerText = 'An error occurred while processing your request.';
             }
+        });
+        
+        // Handle fingerprint capture
+        const captureButton = document.getElementById('captureFingerprint');
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const capture = document.getElementById('capture');
+
+        captureButton.addEventListener('click', () => {
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then((stream) => {
+                    capture.style.display = 'block';
+                    video.style.display = 'block';
+                    video.srcObject = stream;
+                })
+                .catch((err) => {
+                    alert('Camera access denied or not available.');
+                });
+        });
+
+        video.addEventListener('click', async () => {
+            // Capture image from video
+            const context = canvas.getContext('2d');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            // Convert the image to a Blob and send to the server
+            canvas.toBlob(async (blob) => {
+                const formData = new FormData();
+                formData.append('file', blob, 'captured_image.png');
+
+                document.getElementById('result').innerText = 'Processing your Image....';
+
+                try {
+                    const response = await fetch('/capture', {
+                        method: 'POST',
+                        body: formData,
+                    });
+                    const data = await response.json();
+                    if (data.result) {
+                        document.getElementById('result').innerText = `Your Blood Group is ${data.result}`;
+                    } else {
+                        document.getElementById('result').innerText = 'Error: ' + (data.error || 'Unknown error');
+                    }
+                } catch (err) {
+                    document.getElementById('result').innerText = 'An error occurred while processing your request.';
+                }
+            });
         });
     </script>
 </body>

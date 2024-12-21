@@ -82,6 +82,28 @@ def image_classifier():
                 os.remove(filepath)
             raise CustomException(e, sys)
     return render_template('image_classifier.html')
+
+@app.route("/capture", methods=['POST'])
+def capture_image():
+    try:
+        # Access the image sent from the camera
+        image_data = request.files['file']
+
+        # Save the captured image temporarily
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], 'captured_image.png')
+        image_data.save(filepath)
+
+        # Use the prediction pipeline to classify the image
+        prediction_pipeline = PredictionPipeline()
+        prediction = prediction_pipeline.run_pipeline(filepath)
+        
+        # Delete the temporary file
+        os.remove(filepath)
+
+        return jsonify(result=prediction)
+    except Exception as e:
+        raise CustomException(e, sys)
+
     
 if __name__ == "__main__":
     app.run(host=APP_HOST, port=APP_PORT, debug= True)
