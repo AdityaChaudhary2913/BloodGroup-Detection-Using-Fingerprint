@@ -6,6 +6,7 @@ from torchvision import transforms
 from bloodgroup.logger import logging
 from bloodgroup.constants import FINAL_MODEL_NAME, CLASSES, IMAGE_SIZE, FINAL_MODEL_PATH, DEVICE
 from bloodgroup.exception import CustomException
+from bloodgroup.components.model_creater import initialize_model
 from bloodgroup.components.data_transformation import DataTransformation
 from bloodgroup.entity.config_entity import DataTransformationConfig
 from bloodgroup.entity.artifact_entity import DataIngestionArtifacts
@@ -20,6 +21,16 @@ class PredictionPipeline:
             data_transformation_config=DataTransformationConfig,
             data_ingestion_artifacts=DataIngestionArtifacts
         )
+    
+    def load_model(self):
+        try:
+            model = initialize_model()
+            model.load_state_dict(torch.load(self.model_path, map_location=self.device))
+            model.to(self.device)
+            model.eval()
+            return model
+        except Exception as e:
+            raise CustomException(e, sys) from e
 
     def preprocess_image(self, image_path):
         try:
@@ -53,13 +64,13 @@ class PredictionPipeline:
         logging.info("Entered the run_pipeline method of PredictionPipeline class")
         try:
             # Load the trained model
-            model = torch.load(self.model_path, map_location=self.device)
-            model.eval()
+            model = self.load_model()
             
             # Preprocess the image
             image = self.preprocess_image(image_path).to(self.device)
             
             predicted_class = self.predict(model, image)
+            
             logging.info("Exited the run_pipeline method of PredictionPipeline class")
             return predicted_class
         except Exception as e:
