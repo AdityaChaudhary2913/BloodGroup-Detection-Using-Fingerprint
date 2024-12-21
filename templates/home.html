@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blood Group Detector</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            text-align: center;
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            font-size: 36px;
+            color: #333;
+            margin-bottom: 40px;
+        }
+        .button {
+            display: inline-block;
+            padding: 15px 30px;
+            font-size: 18px;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            color: #fff;
+            background-color: #007BFF;
+            border-radius: 5px;
+            border: none;
+            margin: 10px;
+            transition: background-color 0.3s ease;
+        }
+        .button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+    <script>
+        function displayTrainingMessage() {
+            document.getElementById("status").innerHTML = "Model is training...";
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome to Blood Group Detector</h1>
+        <a id="status" class="button" onclick="showAdminModal()">Train the Model</a>
+        <a href="{{ url_for('image_classifier') }}" class="button">Detect Blood Group</a>
+        <div id="adminModal" style="display: none;">
+            <div class="modal-content">
+                <h2>Admin Login</h2>
+                <label for="adminID">Admin ID:</label>
+                <input type="text" id="adminID" placeholder="Enter Admin ID">
+                <br>
+                <label for="adminPassword">Password:</label>
+                <input type="password" id="adminPassword" placeholder="Enter Password">
+                <br>
+                <button onclick="submitAdminLogin()">Submit</button>
+                <button onclick="closeModal()">Cancel</button>
+            </div>
+        </div>
+        <a href="{{ url_for('logout') }}" id="logout" class="button" style="display: none;">Logout</a>
+    </div>
+    <script>
+        // Show the modal when "Train Model" button is clicked
+        function showAdminModal() {
+            document.getElementById("adminModal").style.display = "block";
+            document.getElementById('adminID').value = '';
+            document.getElementById('adminPassword').value = '';
+        }
+
+        // Close the modal
+        function closeModal() {
+            document.getElementById("adminModal").style.display = "none";
+        }
+
+        // Submit admin login and check credentials
+        async function submitAdminLogin() {
+            const adminID = document.getElementById("adminID").value;
+            const adminPassword = document.getElementById("adminPassword").value;
+
+            const response = await fetch('/admin_login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ adminID: adminID, adminPassword: adminPassword }),
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                // Credentials are correct, proceed to train the model
+                document.getElementById("logout").style.display = "block";
+                window.location.href = '/train';
+                displayTrainingMessage()
+            } else {
+                alert('Invalid Admin ID or Password');
+                closeModal();  // Close modal on failure
+            }
+        }
+    </script>
+</body>
+</html>

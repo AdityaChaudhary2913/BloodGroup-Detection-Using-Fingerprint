@@ -55,7 +55,6 @@ class PredictionPipeline:
                 outputs = model(image)
                 _, predicted_class = torch.max(outputs, 1)
                 predicted_label = self.classes[predicted_class.item()]
-                print(f"Prediction: {predicted_label}")
                 return predicted_label
         except Exception as e:
             raise CustomException(e, sys) from e

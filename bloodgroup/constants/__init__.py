@@ -6,6 +6,9 @@ from datetime import datetime
 TIMESTAMP: str = datetime.now().strftime("%m_%d_%Y_%H_%M_%S")
 ARTIFACTS_DIR = os.path.join("artifacts", TIMESTAMP)
 CLASSES = ["A+", "A-", "AB+", "AB-", "B+", "B-", "O+", "O-"]
+APP_PORT = 8080
+APP_HOST = "0.0.0.0"
+UPLOAD_FOLDER = "static/uploads"
 
 # Data ingestion constants
 DATA_INGESTION_ARTIFACTS_DIR = os.path.join("artifacts", "DataIngestionArtifacts")
