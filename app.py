@@ -1,7 +1,7 @@
 from flask import Flask, render_template, url_for, request, session, jsonify, redirect
 from bloodgroup.exception import CustomException
 from bloodgroup.constants import *
-import sys, os
+import sys, os, cv2
 from bloodgroup.pipeline.training_pipeline import TrainPipeline
 from bloodgroup.pipeline.prediction_pipeline import PredictionPipeline
 
@@ -59,6 +59,64 @@ def logout():
     session.pop('is_training', None)
     return redirect(url_for('home'))
 
+def preprocess_image(filepath):
+    try:
+        # Read the image
+        image = cv2.imread(filepath, cv2.IMREAD_GRAYSCALE)  # Convert to grayscale
+
+        # Crop the central region to isolate the fingerprint
+        height, width = image.shape
+        crop_size = min(height, width)  # Square crop
+        start_x = (width - crop_size) // 2
+        start_y = (height - crop_size) // 2
+        cropped = image[start_y:start_y + crop_size, start_x:start_x + crop_size]
+
+        # Resize the image to match dataset dimensions (e.g., 96x96)
+        desired_width, desired_height = 96, 96  # Replace with your dataset's dimensions
+        resized = cv2.resize(cropped, (desired_width, desired_height), interpolation=cv2.INTER_AREA)
+
+        # Apply Gaussian blur to reduce noise
+        blurred = cv2.GaussianBlur(resized, (5, 5), 0)
+
+        # Enhance fingerprint details using CLAHE
+        clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+        enhanced = clahe.apply(blurred)
+
+        # Convert to binary image (thresholding)
+        _, binary = cv2.threshold(enhanced, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+
+        # Apply morphological operations to refine the fingerprint
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
+        morphed = cv2.morphologyEx(binary, cv2.MORPH_CLOSE, kernel)
+
+        # Save the preprocessed image
+        preprocessed_path = filepath.replace('captured_image.png', 'preprocessed_image.png')
+        cv2.imwrite(preprocessed_path, morphed)
+
+        return preprocessed_path
+    except Exception as e:
+        raise CustomException(f"Error in preprocessing image: {str(e)}", sys)
+    
+@app.route("/preprocess", methods=['POST'])
+def preprocess_image_api():
+    try:
+        if 'file' not in request.files:
+            return jsonify(error="No file uploaded"), 400
+        file = request.files['file']
+        if file.filename == '':
+            return jsonify(error="No file selected"), 400
+        
+        # Save the uploaded file temporarily
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], f"preprocessed_{file.filename}")
+        file.save(filepath)
+
+        preprocessed_path = preprocess_image(filepath)
+
+        # Return the preprocessed image path
+        return jsonify(path=f"/{preprocessed_path}")
+    except Exception as e:
+        return jsonify(error=str(e)), 500
+
 @app.route("/image_classifier", methods=['POST', 'GET'])
 def image_classifier():
     if request.method == 'POST':
@@ -75,34 +133,13 @@ def image_classifier():
         try:
             prediction_pipeline = PredictionPipeline()
             prediction = prediction_pipeline.run_pipeline(filepath)
-            os.remove(filepath)
+            # os.remove(filepath)
             return jsonify(result=prediction, file=file.filename)
         except Exception as e:
             if os.path.exists(filepath):
                 os.remove(filepath)
             raise CustomException(e, sys)
     return render_template('image_classifier.html')
-
-@app.route("/capture", methods=['POST'])
-def capture_image():
-    try:
-        # Access the image sent from the camera
-        image_data = request.files['file']
-
-        # Save the captured image temporarily
-        filepath = os.path.join(app.config['UPLOAD_FOLDER'], 'captured_image.png')
-        image_data.save(filepath)
-
-        # Use the prediction pipeline to classify the image
-        prediction_pipeline = PredictionPipeline()
-        prediction = prediction_pipeline.run_pipeline(filepath)
-        
-        # Delete the temporary file
-        os.remove(filepath)
-
-        return jsonify(result=prediction)
-    except Exception as e:
-        raise CustomException(e, sys)
 
     
 if __name__ == "__main__":

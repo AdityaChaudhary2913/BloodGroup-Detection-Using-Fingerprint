@@ -3,29 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detect Blood Group</title>
+    <title>Blood Group Detector</title>
     <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+        }
+
         .container {
             text-align: center;
             background-color: #fff;
             padding: 40px;
+            margin: 50px auto;
+            max-width: 600px;
             border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
+
         h1 {
             font-size: 36px;
             color: #333;
-            margin-bottom: 40px;
-        }
-        input[type="file"] {
-            padding: 10px;
-            font-size: 16px;
             margin-bottom: 20px;
         }
+
         .button {
             display: inline-block;
-            padding: 15px 30px;
-            font-size: 18px;
+            padding: 12px 20px;
+            font-size: 16px;
             cursor: pointer;
             text-align: center;
             text-decoration: none;
@@ -33,25 +39,94 @@
             background-color: #007BFF;
             border-radius: 5px;
             border: none;
-            margin: 10px;
-            transition: background-color 0.3s ease;
+            margin: 10px 5px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            display: none; /* Hide buttons initially */
         }
+
         .button:hover {
             background-color: #0056b3;
+            transform: scale(1.05);
         }
-        #result {
-            font-size: 20px;
-            color: #000000;
-            margin-top: 20px;
-        }
-        #video {
+
+        #preview, #preprocessedPreview {
             display: none;
             margin: 20px auto;
+            width: 150px;
+            height: 150px;
             border: 2px solid #007BFF;
             border-radius: 10px;
+            object-fit: cover;
         }
-        #canvas {
-            display: none;
+
+        .image-preview-container {
+            display: flex;
+            justify-content: space-evenly;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .image-preview-container img {
+            margin: 10px;
+        }
+
+        #result {
+            font-size: 20px;
+            color: #555;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+
+        .button-container {
+            margin-top: 20px;
+        }
+
+        .instructions {
+            font-size: 16px;
+            color: #666;
+            margin-top: 10px;
+        }
+
+        .file-input-container {
+            position: relative;
+            width: 100%;
+            max-width: 300px;
+            margin: 0 auto 20px auto;
+        }
+
+        .file-input-container input[type="file"] {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .file-input-label {
+            display: block;
+            background-color: #007BFF;
+            color: #fff;
+            padding: 10px 20px;
+            text-align: center;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .file-input-label:hover {
+            background-color: #0056b3;
+            transform: scale(1.05);
+        }
+
+        .file-name {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #555;
+            text-align: center;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
         }
     </style>
 </head>
@@ -59,106 +134,159 @@
     <div class="container">
         <h1>Blood Group Detector</h1>
         <form id="uploadForm">
-            <input type="file" id="fileInput" name="file" accept="image/*" required />
-            <img id="preview" src="#" alt="Image Preview" style="display: none;" />
-            <button type="submit" class="button">Detect</button>
+            <div class="file-input-container">
+                <label for="fileInput" class="file-input-label">Choose File</label>
+                <input type="file" id="fileInput" name="file" accept="image/*" />
+                <p id="fileName" class="file-name">No file selected</p>
+            </div>
+            <p class="instructions">Upload your fingerprint image to begin.</p>
+            <div class="image-preview-container">
+                <img id="preview" src="#" alt="Original Image Preview" />
+                <img id="preprocessedPreview" src="#" alt="Preprocessed Image Preview" />
+            </div>
+            <div class="button-container">
+                <button type="button" id="preprocessImage" class="button">Preprocess Image</button>
+                <br>
+                <button type="button" id="detectOriginal" class="button">Detect Using Original Image</button>
+                <button type="button" id="detectPreprocessed" class="button">Detect Using Preprocessed Image</button>
+            </div>
         </form>
-        <button id="captureFingerprint" class="button">Capture Fingerprint</button>
-        <p id="capture" style="display: none;">Click on Video to Capture</p>
-        <video id="video" width="300" height="300" autoplay></video>
-        <canvas id="canvas"></canvas>
         <p id="result"></p>
     </div>
 
     <script>
+        let preprocessedImagePath = null;
+
+        const preprocessButton = document.getElementById('preprocessImage');
+        const detectOriginalButton = document.getElementById('detectOriginal');
+        const detectPreprocessedButton = document.getElementById('detectPreprocessed');
+
+        // Initially hide all buttons
+        preprocessButton.style.display = 'none';
+        detectOriginalButton.style.display = 'none';
+        detectPreprocessedButton.style.display = 'none';
+
         document.getElementById('fileInput').addEventListener('change', function (e) {
             const file = e.target.files[0];
+            const fileName = document.getElementById('fileName');
             const preview = document.getElementById('preview');
+            const preprocessedPreview = document.getElementById('preprocessedPreview');
+            const instructions = document.querySelector('.instructions');
 
             if (file) {
+                fileName.textContent = file.name;
+
                 const reader = new FileReader();
                 reader.onload = function (event) {
                     preview.src = event.target.result;
                     preview.style.display = 'block';
-                    preview.style.margin = '20px auto';
                 };
-                reader.readAsDataURL(file); // Convert file to data URL
+                reader.readAsDataURL(file);
+
+                preprocessedPreview.style.display = 'none';
+                preprocessedImagePath = null;
+
+                instructions.style.display = 'none';
+                preprocessButton.style.display = 'inline-block';
+                detectOriginalButton.style.display = 'inline-block';
+                detectPreprocessedButton.style.display = 'none';
             } else {
-                preview.src = '#';
-                preview.style.display = 'none'; // Hide the preview if no file selected
+                fileName.textContent = 'No file selected';
+                preview.style.display = 'none';
+                preprocessedPreview.style.display = 'none';
+                preprocessButton.style.display = 'none';
+                detectOriginalButton.style.display = 'none';
+                detectPreprocessedButton.style.display = 'none';
             }
         });
 
-        document.getElementById('uploadForm').addEventListener('submit', async function (e) {
-            e.preventDefault();
+        preprocessButton.addEventListener('click', async function () {
             const formData = new FormData();
             const fileInput = document.getElementById('fileInput');
-            formData.append('file', fileInput.files[0]);
+            const preprocessedPreview = document.getElementById('preprocessedPreview');
 
-            document.getElementById('result').innerText = 'Processing your Image....';
+            if (!fileInput.files[0]) {
+                document.getElementById('result').innerText = 'Please upload an image first!';
+                return;
+            }
+
+            formData.append('file', fileInput.files[0]);
+            document.getElementById('result').innerText = 'Preprocessing your Image....';
+
+            try {
+                const response = await fetch('/preprocess', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+
+                if (data.path) {
+                    preprocessedImagePath = data.path;
+                    preprocessedPreview.src = preprocessedImagePath;
+                    preprocessedPreview.style.display = 'block';
+                    detectPreprocessedButton.style.display = 'inline-block';
+                    document.getElementById('result').innerText = 'Image preprocessed successfully.';
+                    preprocessButton.style.display = 'none';
+                } else {
+                    document.getElementById('result').innerText = 'Error: ' + (data.error || 'Unknown error');
+                }
+            } catch (err) {
+                document.getElementById('result').innerText = 'An error occurred while preprocessing the image.';
+            }
+        });
+
+        detectOriginalButton.addEventListener('click', async function () {
+            const formData = new FormData();
+            const fileInput = document.getElementById('fileInput');
+
+            if (!fileInput.files[0]) {
+                document.getElementById('result').innerText = 'Please upload an image first!';
+                return;
+            }
+
+            formData.append('file', fileInput.files[0]);
+            document.getElementById('result').innerText = 'Detecting blood group using the original image....';
+
             try {
                 const response = await fetch('/image_classifier', {
                     method: 'POST',
                     body: formData
                 });
                 const data = await response.json();
+
                 if (data.result) {
                     document.getElementById('result').innerText = `Your Blood Group is ${data.result}`;
                 } else {
                     document.getElementById('result').innerText = 'Error: ' + (data.error || 'Unknown error');
                 }
             } catch (err) {
-                document.getElementById('result').innerText = 'An error occurred while processing your request.';
+                document.getElementById('result').innerText = 'An error occurred while detecting the blood group.';
             }
         });
-        
-        // Handle fingerprint capture
-        const captureButton = document.getElementById('captureFingerprint');
-        const video = document.getElementById('video');
-        const canvas = document.getElementById('canvas');
-        const capture = document.getElementById('capture');
 
-        captureButton.addEventListener('click', () => {
-            navigator.mediaDevices.getUserMedia({ video: true })
-                .then((stream) => {
-                    capture.style.display = 'block';
-                    video.style.display = 'block';
-                    video.srcObject = stream;
-                })
-                .catch((err) => {
-                    alert('Camera access denied or not available.');
-                });
-        });
+        detectPreprocessedButton.addEventListener('click', async function () {
+            document.getElementById('result').innerText = 'Detecting blood group using the preprocessed image....';
 
-        video.addEventListener('click', async () => {
-            // Capture image from video
-            const context = canvas.getContext('2d');
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-            // Convert the image to a Blob and send to the server
-            canvas.toBlob(async (blob) => {
+            try {
                 const formData = new FormData();
-                formData.append('file', blob, 'captured_image.png');
+                const response = await fetch(preprocessedImagePath);
+                const blob = await response.blob();
+                formData.append('file', new File([blob], 'preprocessed_img.png', { type: blob.type }));
 
-                document.getElementById('result').innerText = 'Processing your Image....';
+                const detectResponse = await fetch('/image_classifier', {
+                    method: 'POST',
+                    body: formData
+                });
 
-                try {
-                    const response = await fetch('/capture', {
-                        method: 'POST',
-                        body: formData,
-                    });
-                    const data = await response.json();
-                    if (data.result) {
-                        document.getElementById('result').innerText = `Your Blood Group is ${data.result}`;
-                    } else {
-                        document.getElementById('result').innerText = 'Error: ' + (data.error || 'Unknown error');
-                    }
-                } catch (err) {
-                    document.getElementById('result').innerText = 'An error occurred while processing your request.';
+                const data = await detectResponse.json();
+                if (data.result) {
+                    document.getElementById('result').innerText = `Your Blood Group is ${data.result}`;
+                } else {
+                    document.getElementById('result').innerText = 'Error: ' + (data.error || 'Unknown error');
                 }
-            });
+            } catch (err) {
+                document.getElementById('result').innerText = 'An error occurred while detecting the blood group.';
+            }
         });
     </script>
 </body>
