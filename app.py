@@ -133,7 +133,7 @@ def image_classifier():
         try:
             prediction_pipeline = PredictionPipeline()
             prediction = prediction_pipeline.run_pipeline(filepath)
-            # os.remove(filepath)
+            os.remove(filepath)
             return jsonify(result=prediction, file=file.filename)
         except Exception as e:
             if os.path.exists(filepath):

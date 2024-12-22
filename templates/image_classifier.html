@@ -22,6 +22,17 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
 
+        .instruction-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .instruction-container img {
+            margin-top: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
         h1 {
             font-size: 36px;
             color: #333;
@@ -133,13 +144,18 @@
 <body>
     <div class="container">
         <h1>Blood Group Detector</h1>
+        <div class="instruction-container">
+            <p class="instructions">Please upload a fingerprint image that looks somewhere like this</p>
+            <img src="/static/demo.BMP" alt="Example Fingerprint">
+            <p class="instructions">If you dont have image like this then only preprocess after upload</p>
+            <p class="instructions">Upload your fingerprint image to begin.</p>
+        </div>
         <form id="uploadForm">
             <div class="file-input-container">
                 <label for="fileInput" class="file-input-label">Choose File</label>
                 <input type="file" id="fileInput" name="file" accept="image/*" />
                 <p id="fileName" class="file-name">No file selected</p>
             </div>
-            <p class="instructions">Upload your fingerprint image to begin.</p>
             <div class="image-preview-container">
                 <img id="preview" src="#" alt="Original Image Preview" />
                 <img id="preprocessedPreview" src="#" alt="Preprocessed Image Preview" />
@@ -171,7 +187,7 @@
             const fileName = document.getElementById('fileName');
             const preview = document.getElementById('preview');
             const preprocessedPreview = document.getElementById('preprocessedPreview');
-            const instructions = document.querySelector('.instructions');
+            const instConr = document.getElementsByClassName('instruction-container')[0];
 
             if (file) {
                 fileName.textContent = file.name;
@@ -186,7 +202,7 @@
                 preprocessedPreview.style.display = 'none';
                 preprocessedImagePath = null;
 
-                instructions.style.display = 'none';
+                instConr.style.display = 'none';
                 preprocessButton.style.display = 'inline-block';
                 detectOriginalButton.style.display = 'inline-block';
                 detectPreprocessedButton.style.display = 'none';
