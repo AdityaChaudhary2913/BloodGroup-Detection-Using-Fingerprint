@@ -6,7 +6,7 @@
 
 **Quick Links**
 
- - **Model (Google Drive):** https://drive.google.com/file/d/1fYMMivoZkwdRhf4-WesmlYpjE0dLUJJX/view?usp=sharing
+ - **Demo Video:** https://drive.google.com/file/d/1fYMMivoZkwdRhf4-WesmlYpjE0dLUJJX/view?usp=sharing
 
 **Repository Structure (important files)**
 
@@ -81,11 +81,3 @@ python app.py
 
  - If the model cannot be loaded, verify the model path in `bloodgroup/constants.py` and ensure the model file exists (or download from the Drive link above).
  - If image uploads fail, confirm `UPLOAD_FOLDER` exists and the Flask process has write permissions.
-
-**Contact**
-
- - Author: `AdityaChaudhary` — adityachaudhary1306@gmail.com
-
-**License**
-
- - This repository does not include an explicit license file. Add a `LICENSE` if you intend to publish or share the code with a specific license.
