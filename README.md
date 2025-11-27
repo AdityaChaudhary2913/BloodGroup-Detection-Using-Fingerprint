@@ -63,7 +63,6 @@ python app.py
 
  - Final trained model files live under `artifacts/` and `FinalModel/` (example: `artifacts/FinalModel/final_model_after_training.pth`).
  - The model referenced by the web app is expected at the path defined in `bloodgroup/constants` (check `FINAL_MODEL_PATH` and `FINAL_MODEL_AFTER_EVALUATION_NAME`).
- - A downloadable model (provided link): https://drive.google.com/file/d/1fYMMivoZkwdRhf4-WesmlYpjE0dLUJJX/view?usp=sharing
 
 **Notes on Preprocessing**
 
